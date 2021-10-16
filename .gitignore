@@ -1,0 +1,8 @@
+*.bak
+*.pkg.*
+pkg/
+src/
+*.xz
+*.sig
+*.bz2
+*.zip
