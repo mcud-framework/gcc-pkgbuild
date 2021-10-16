@@ -88,7 +88,11 @@ build() {
   # using -pipe causes spurious test-suite failures
   # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48565
   CFLAGS=${CFLAGS/-pipe/}
+  CFLAGS=${CFLAGS/-Wformat/}
+  CFLAGS=${CFLAGS/-Werror=format-security/}
   CXXFLAGS=${CXXFLAGS/-pipe/}
+  CXXFLAGS=${CXXFLAGS/-Wformat/}
+  CXXFLAGS=${CXXFLAGS/-Werror=format-security/}
 
   "$srcdir/$_basedir/configure" --prefix=/usr \
       --libdir=/usr/lib \
