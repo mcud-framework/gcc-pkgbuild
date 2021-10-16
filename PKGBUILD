@@ -56,7 +56,6 @@ fi
 
 
 prepare() {
-  [[ ! -d gcc ]] && ln -s gcc-${pkgver/+/-} gcc
   cd $_basedir
 
   # link isl for in-tree build
