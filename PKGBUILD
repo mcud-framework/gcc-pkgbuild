@@ -119,6 +119,7 @@ build() {
       --enable-plugin \
       --enable-shared \
       --enable-threads=posix \
+      --enable-libphobos \
       --disable-libssp \
       --disable-libstdcxx-pch \
       --disable-libunwind-exceptions \
