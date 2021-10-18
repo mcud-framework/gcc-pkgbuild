@@ -6,11 +6,11 @@
 # NOTE: libtool requires rebuilt with each new gcc version
 
 pkgname=(gcc gcc-libs gcc-fortran gcc-objc gcc-ada gcc-go lib32-gcc-libs gcc-d)
-pkgver=11.2.0
+pkgver=12.0.0
 _majorver=${pkgver%%.*}
 _islver=0.24
 _snapshot=e5a67458da39de7db8971cc5ec017fa6199a08c1
-pkgrel=2
+pkgrel=1
 pkgdesc='The GNU Compiler Collection'
 arch=(x86_64)
 license=(GPL LGPL FDL custom)
@@ -70,9 +70,6 @@ prepare() {
   # hack! - some configure tests for header files using "$CPP $CPPFLAGS"
   sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" {libiberty,gcc}/configure
 
-  # D hacks
-  patch -p1 -i "$srcdir/gdc_phobos_path.patch"
-
   # Reproducible gcc-ada
   patch -Np0 < "$srcdir/gcc-ada-repro.patch"
 
@@ -123,8 +120,7 @@ build() {
       --disable-libssp \
       --disable-libstdcxx-pch \
       --disable-libunwind-exceptions \
-      --disable-werror \
-      gdc_include_dir=/usr/include/dlang/gdc
+      --disable-werror
 
   make
 
