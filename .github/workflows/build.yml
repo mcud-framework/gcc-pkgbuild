@@ -16,7 +16,7 @@ jobs:
           useradd -m build
           chown -R build .
       - name: Make package
-        run: su build -c "makepkg -s --skippgpcheck"
+        run: su build -c "makepkg -s --skippgpcheck --nocheck"
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
