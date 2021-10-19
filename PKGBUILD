@@ -15,7 +15,7 @@ pkgdesc='The GNU Compiler Collection'
 arch=(x86_64)
 license=(GPL LGPL FDL custom)
 url='https://gcc.gnu.org'
-makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs python git libxcrypt gdc)
+makedepends=(binutils libmpc doxygen python git libxcrypt gdc)
 checkdepends=(dejagnu inetutils)
 options=(!emptydirs)
 _libdir=usr/lib/gcc/$CHOST/${pkgver%%+*}
@@ -138,17 +138,15 @@ package_gcc-libs() {
   pkgdesc='Runtime libraries shipped by GCC'
   depends=('glibc>=2.27')
   options+=(!strip)
-  provides=($pkgname-multilib libgo.so libgfortran.so libgphobos.so
+  provides=(libgphobos.so
             libubsan.so libasan.so libtsan.so liblsan.so)
-  replaces=($pkgname-multilib libgphobos)
+  replaces=(libgphobos)
 
   cd gcc-build
   make -C $CHOST/libgcc DESTDIR="$pkgdir" install-shared
   rm -f "$pkgdir/$_libdir/libgcc_eh.a"
 
   for lib in libatomic \
-             libgfortran \
-             libgo \
              libgomp \
              libitm \
              libquadmath \
@@ -158,7 +156,6 @@ package_gcc-libs() {
     make -C $CHOST/$lib DESTDIR="$pkgdir" install-toolexeclibLTLIBRARIES
   done
 
-  make -C $CHOST/libobjc DESTDIR="$pkgdir" install-libs
   make -C $CHOST/libstdc++-v3/po DESTDIR="$pkgdir" install
 
   make -C $CHOST/libphobos DESTDIR="$pkgdir" install
@@ -171,9 +168,6 @@ package_gcc-libs() {
     make -C $CHOST/$lib DESTDIR="$pkgdir" install-info
   done
 
-  # remove files provided by lib32-gcc-libs
-  rm -rf "$pkgdir"/usr/lib32/
-
   # Install Runtime Library Exception
   install -Dm644 "$srcdir/$_basedir/COPYING.RUNTIME" \
     "$pkgdir/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION"
@@ -183,7 +177,6 @@ package_gcc() {
   pkgdesc="The GNU Compiler Collection - C and C++ frontends"
   depends=("gcc-libs=$pkgver-$pkgrel" 'binutils>=2.28' libmpc)
   groups=('base-devel')
-  optdepends=('lib32-gcc-libs: for generating code for 32-bit ABI')
   provides=($pkgname-multilib)
   replaces=($pkgname-multilib)
   options+=(staticlibs)
@@ -197,22 +190,18 @@ package_gcc() {
   install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
 
   make -C $CHOST/libgcc DESTDIR="$pkgdir" install
-  make -C $CHOST/32/libgcc DESTDIR="$pkgdir" install
-  rm -f "$pkgdir"/usr/lib{,32}/libgcc_s.so*
+  rm -f "$pkgdir"/usr/lib/libgcc_s.so*
 
   make -C $CHOST/libstdc++-v3/src DESTDIR="$pkgdir" install
   make -C $CHOST/libstdc++-v3/include DESTDIR="$pkgdir" install
   make -C $CHOST/libstdc++-v3/libsupc++ DESTDIR="$pkgdir" install
   make -C $CHOST/libstdc++-v3/python DESTDIR="$pkgdir" install
-  make -C $CHOST/32/libstdc++-v3/src DESTDIR="$pkgdir" install
-  make -C $CHOST/32/libstdc++-v3/include DESTDIR="$pkgdir" install
-  make -C $CHOST/32/libstdc++-v3/libsupc++ DESTDIR="$pkgdir" install
 
   make DESTDIR="$pkgdir" install-libcc1
   install -d "$pkgdir/usr/share/gdb/auto-load/usr/lib"
   mv "$pkgdir"/usr/lib/libstdc++.so.6.*-gdb.py \
     "$pkgdir/usr/share/gdb/auto-load/usr/lib/"
-  rm "$pkgdir"/usr/lib{,32}/libstdc++.so*
+  rm "$pkgdir"/usr/lib/libstdc++.so*
 
   make DESTDIR="$pkgdir" install-fixincludes
   make -C gcc DESTDIR="$pkgdir" install-mkheaders
@@ -229,17 +218,13 @@ package_gcc() {
   make -C $CHOST/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
   make -C $CHOST/libsanitizer/tsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
   make -C $CHOST/libsanitizer/lsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
-  make -C $CHOST/32/libgomp DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
-  make -C $CHOST/32/libitm DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
-  make -C $CHOST/32/libsanitizer DESTDIR="$pkgdir" install-nodist_{saninclude,toolexeclib}HEADERS
-  make -C $CHOST/32/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
 
   make -C libiberty DESTDIR="$pkgdir" install
   install -m644 libiberty/pic/libiberty.a "$pkgdir/usr/lib"
 
   make -C gcc DESTDIR="$pkgdir" install-man install-info
-  rm "$pkgdir"/usr/share/man/man1/{gccgo,gfortran,gdc}.1
-  rm "$pkgdir"/usr/share/info/{gccgo,gfortran,gnat-style,gnat_rm,gnat_ugn,gdc}.info
+  rm "$pkgdir"/usr/share/man/man1/gdc.1
+  rm "$pkgdir"/usr/share/info/gdc.info
 
   make -C libcpp DESTDIR="$pkgdir" install
   make -C gcc DESTDIR="$pkgdir" install-po
@@ -253,9 +238,6 @@ package_gcc() {
 
   # install the libstdc++ man pages
   make -C $CHOST/libstdc++-v3/doc DESTDIR="$pkgdir" doc-install-man
-
-  # remove files provided by lib32-gcc-libs
-  rm -f "$pkgdir"/usr/lib32/lib{stdc++,gcc_s}.so
 
   # byte-compile python libraries
   python -m compileall "$pkgdir/usr/share/gcc-${pkgver%%+*}/"
@@ -282,7 +264,6 @@ package_gcc-d() {
 
   make -C $CHOST/libphobos DESTDIR="$pkgdir" install
   rm -f "$pkgdir/usr/lib/"lib{gphobos,gdruntime}.so*
-  rm -f "$pkgdir/usr/lib32/"lib{gphobos,gdruntime}.so*
 
   install -d "$pkgdir"/usr/include/dlang
   ln -s /"${_libdir}"/include/d "$pkgdir"/usr/include/dlang/gdc
